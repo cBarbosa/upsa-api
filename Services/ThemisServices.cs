@@ -143,11 +143,14 @@ namespace upsa_api.Services
 
         #region private methods
 
-        private async Task<AndamentoProcesso> AddAndamentoPorStatus(AndamentoProcessoInput andamento, int desdobramentoId, int tipoAndamento)
+        private async Task<AndamentoProcesso> AddAndamentoPorStatus(
+            AndamentoProcessoInput andamento,
+            int desdobramentoId,
+            int tipoAndamento)
         {
             var _andamento = new AndamentoProcessoInput
             {
-                Data = andamento.DataJudicial,
+                Data = tipoAndamento.Equals(6) ? andamento.Data : andamento.DataJudicial,
                 Descricao = andamento.Descricao,
                 Advogado = new Processo.Pessoa { Id = andamento.Advogado.Id },
                 Desdobramento = new Processo.Desdobramento { Id = desdobramentoId },
@@ -191,7 +194,10 @@ namespace upsa_api.Services
             }
         }
 
-        private async Task<bool> SendMessage(string fromMail, AndamentoProcesso resultInterno, AndamentoProcesso resultadoJudicial)
+        private async Task<bool> SendMessage(
+            string fromMail,
+            AndamentoProcesso resultInterno,
+            AndamentoProcesso resultadoJudicial)
         {
             var _htmlBodyMessage = $@"
                 <h3>Distribuição - {resultInterno?.Processo}</h3>
