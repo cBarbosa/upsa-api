@@ -147,7 +147,7 @@ namespace upsa_api.Services
         {
             var _andamento = new AndamentoProcessoInput
             {
-                Data = andamento.Data,
+                Data = andamento.DataJudicial,
                 Descricao = andamento.Descricao,
                 Advogado = new Processo.Pessoa { Id = andamento.Advogado.Id },
                 Desdobramento = new Processo.Desdobramento { Id = desdobramentoId },
@@ -194,17 +194,17 @@ namespace upsa_api.Services
         private async Task<bool> SendMessage(string fromMail, AndamentoProcesso resultInterno, AndamentoProcesso resultadoJudicial)
         {
             var _htmlBodyMessage = $@"
-                <h3>Distribuição Process {resultInterno?.Processo}</h3>
+                <h3>Distribuição - {resultInterno?.Processo}</h3>
                 <strong>Advogado Responsável:</strong> {resultInterno?.AdvogadoNome}<BR/>
                 <strong>Cliente:</strong> {resultInterno?.ClienteNome}<BR/>
                 <strong>Descrição:</strong> {resultInterno?.Descricao}<BR/>
                 <strong>Data Inclusão:</strong> {resultInterno?.DataInclusao}<BR/>
 
                 <h4>{resultInterno?.TipoNome}</h4>
-                <strong>Data Hora:</strong> {resultInterno?.Data} {resultInterno?.Hora}<BR/>
+                <strong>Data Hora:</strong> {resultInterno?.DataFormatada} {resultInterno?.HoraFormatada}<BR/>
 
-                <h4>{resultInterno?.TipoNome}</h4>
-                <strong>Data Hora:</strong> {resultadoJudicial?.Data} {resultadoJudicial?.Hora}<BR/>
+                <h4>{resultadoJudicial?.TipoNome}</h4>
+                <strong>Data Hora:</strong> {resultadoJudicial?.DataFormatada} {resultadoJudicial?.HoraFormatada}<BR/>
             ";
 
             await _emailService.SendMailAsync(new List<string> { fromMail }, null, new List<string> { "xbrown@gmail.com" }, null, "Distribuição de processo", _htmlBodyMessage, 3);
