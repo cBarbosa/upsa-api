@@ -153,13 +153,13 @@ namespace upsa_api.Services
                 using HttpClient http = new HttpClient();
                 http.DefaultRequestHeaders.Add(headerAuthAPI, headerUserNamePasswordAPI);
                 var _content = new StringContent(JsonSerializer.Serialize(process, options), Encoding.UTF8, "application/json");
-                var result = await http.PostAsync(new Uri($"{hostBaseAPI}/processo/novo/json"), _content);
+                var result = await http.PostAsync(new Uri($"{hostBaseAPI}processo/novo/json"), _content);
                 var resultContent = await result.Content.ReadAsStringAsync();
 
                 if (result.StatusCode != HttpStatusCode.OK)
                     return null;
 
-                return JsonSerializer.Deserialize<Processo>(resultContent, options);
+                return await GetProcess(process.Numero);
             }
             catch (HttpRequestException re)
             {
@@ -256,7 +256,7 @@ namespace upsa_api.Services
 
         public class Processo
         {
-            public int Id { get; set; }
+            public int? Id { get; set; }
             public string Numero { get; set; }
             public string Tipo { get; set; }
             public string ParteAtiva { get; set; }
