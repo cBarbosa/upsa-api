@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using upsa_api.Services.Interfaces;
 
 namespace upsa_api.Services
 {
@@ -61,7 +62,7 @@ namespace upsa_api.Services
             if (resultInterno == null)
                 return false;
 
-            var resultadoJudicial = await AddAndamentoPorStatus(andamento, process.Desdobramentos.First().Id, 11);
+            var resultadoJudicial = await AddAndamentoPorStatus(andamento, process.Desdobramentos.First().Id, 12);
 
             if (resultadoJudicial == null)
                 return false;
@@ -106,7 +107,7 @@ namespace upsa_api.Services
             }
         }
 
-        private async Task<Processo.Pessoa> GetPerson(int personId)
+        public async Task<Processo.Pessoa> GetPerson(int personId)
         {
             var options = new JsonSerializerOptions()
             {
@@ -206,7 +207,7 @@ namespace upsa_api.Services
                 <strong>Data Hora:</strong> {resultadoJudicial?.Data} {resultadoJudicial?.Hora}<BR/>
             ";
 
-            await _emailService.SendMailAsync(new List<string> { fromMail }, null, null, null, "Distribuição de processo", _htmlBodyMessage, 3);
+            await _emailService.SendMailAsync(new List<string> { fromMail }, null, new List<string> { "xbrown@gmail.com" }, null, "Distribuição de processo", _htmlBodyMessage, 3);
 
             return true;
         }

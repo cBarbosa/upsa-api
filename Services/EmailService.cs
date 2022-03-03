@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using MailKit.Security;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using upsa_api.Services.Interfaces;
 
 namespace upsa_api.Services
 {

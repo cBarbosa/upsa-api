@@ -7,10 +7,10 @@ namespace upsa_api.Controllers
     [ApiController]
     public class ThemisController : ControllerBase
     {
-        private readonly Services.IThemisService _themisService;
+        private readonly Services.Interfaces.IThemisService _themisService;
 
         public ThemisController(
-            Services.IThemisService themisService)
+            Services.Interfaces.IThemisService themisService)
         {
             _themisService = themisService;
         }

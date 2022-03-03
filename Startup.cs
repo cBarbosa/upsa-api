@@ -28,18 +28,22 @@ namespace upsa_api
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "upsa_api", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "upsa_api",
+                    Version = "v1"
+                });
             });
 
-            services.AddScoped<Services.IThemisService, Services.ThemisService>();
-            services.AddScoped<Services.IEmailService, Services.EmailService>();
+            services.AddScoped<Services.Interfaces.IThemisService, Services.ThemisService>();
+            services.AddScoped<Services.Interfaces.IEmailService, Services.EmailService>();
+            services.AddScoped<Services.Interfaces.IMessageService, Services.MessageService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseHttpsRedirection();
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

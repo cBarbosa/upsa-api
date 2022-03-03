@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace upsa_api.Services
+namespace upsa_api.Services.Interfaces
 {
     public interface IEmailService
     {
