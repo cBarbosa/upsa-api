@@ -10,10 +10,10 @@ namespace upsa_api.Services
 {
     public class EmailService: IEmailService
     {
-        private readonly string SmtpHost = "smtp.enterprisetecnologia.com.br";
-        private readonly int SmtpPort = 587;
-        private readonly string SmtpAccount = "pedido@enterprisetecnologia.com.br";
-        private readonly string SmtpPassword = ",|SUn^TKw3";
+        private readonly string SmtpHost = "mail.upsa-api.smile.tec.br";
+        private readonly int SmtpPort = 465;
+        private readonly string SmtpAccount = "noreply@upsa-api.smile.tec.br";
+        private readonly string SmtpPassword = "0Kx%N.uXiJau";
         private readonly ILogger<EmailService> logger;
 
         public EmailService(ILogger<EmailService> _logger)
@@ -37,7 +37,7 @@ namespace upsa_api.Services
                 using var Smtp = new MailKit.Net.Smtp.SmtpClient();
                 Smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                await Smtp.ConnectAsync(SmtpHost, SmtpPort, SecureSocketOptions.None);
+                await Smtp.ConnectAsync(SmtpHost, SmtpPort, SecureSocketOptions.Auto);
 
                 if (!string.IsNullOrEmpty(SmtpAccount) && !string.IsNullOrEmpty(SmtpAccount))
                     await Smtp.AuthenticateAsync(SmtpAccount, SmtpPassword);
