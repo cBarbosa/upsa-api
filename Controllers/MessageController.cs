@@ -5,6 +5,7 @@ using upsa_api.Models;
 namespace upsa_api.Controllers
 {
     [Route("api/[controller]")]
+    [Produces("application/json")]
     [ApiController]
     public class MessageController : Controller
     {
@@ -17,7 +18,6 @@ namespace upsa_api.Controllers
         }
 
         [HttpPost("notify-avocado")]
-        [Produces("application/json")]
         public async Task<IActionResult> SendNotifyAvocados(
             [FromBody] NotifyAvocadoModel notify)
         {

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 namespace upsa_api.Controllers
 {
     [Route("api/[controller]")]
+    [Produces("application/json")]
     [ApiController]
     public class ThemisController : ControllerBase
     {
@@ -16,7 +17,6 @@ namespace upsa_api.Controllers
         }
 
         [HttpGet("process/{number}")]
-        [Produces("application/json")]
         public async Task<IActionResult> GetProcess(
             [FromRoute] string number)
         {
@@ -24,12 +24,18 @@ namespace upsa_api.Controllers
         }
 
         [HttpPut("process/add-foward/{number}")]
-        [Produces("application/json")]
         public async Task<IActionResult> AddProcessFoward(
             [FromBody] Services.ThemisService.AndamentoProcessoInput andamento,
             [FromRoute] string number)
         {
             return Ok(await _themisService.AddProcessFoward(number, andamento));
+        }
+
+        [HttpPut("process")]
+        public async Task<IActionResult> PostProcess(
+            [FromBody] Services.ThemisService.Processo process)
+        {
+            return Ok(await _themisService.PostProcess(process));
         }
     }
 }

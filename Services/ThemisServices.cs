@@ -141,6 +141,38 @@ namespace upsa_api.Services
             }
         }
 
+        public async Task<Processo> PostProcess(Processo process)
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            try
+            {
+                using HttpClient http = new HttpClient();
+                http.DefaultRequestHeaders.Add(headerAuthAPI, headerUserNamePasswordAPI);
+                var _content = new StringContent(JsonSerializer.Serialize(process, options), Encoding.UTF8, "application/json");
+                var result = await http.PostAsync(new Uri($"{hostBaseAPI}/processo/novo/json"), _content);
+                var resultContent = await result.Content.ReadAsStringAsync();
+
+                if (result.StatusCode != HttpStatusCode.OK)
+                    return null;
+
+                return JsonSerializer.Deserialize<Processo>(resultContent, options);
+            }
+            catch (HttpRequestException re)
+            {
+                _logger.LogError(re, "HttpRequestException when calling the API");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception when calling the API");
+                throw;
+            }
+        }
+
         #region private methods
 
         private async Task<AndamentoProcesso> AddAndamentoPorStatus(

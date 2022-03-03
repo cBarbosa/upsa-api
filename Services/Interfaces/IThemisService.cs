@@ -7,5 +7,6 @@ namespace upsa_api.Services.Interfaces
         Task<ThemisService.Processo> GetProcess(string number);
         Task<bool> AddProcessFoward(string number, ThemisService.AndamentoProcessoInput andamento);
         Task<ThemisService.Processo.Pessoa> GetPerson(int personId);
+        Task<ThemisService.Processo> PostProcess(ThemisService.Processo process);
     }
 }
