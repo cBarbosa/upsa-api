@@ -41,17 +41,18 @@ namespace upsa_api.Services
 
                 if (!string.IsNullOrEmpty(SmtpAccount) && !string.IsNullOrEmpty(SmtpAccount))
                     await Smtp.AuthenticateAsync(SmtpAccount, SmtpPassword);
-
+                
                 await Smtp.SendAsync(mail);
                 await Smtp.DisconnectAsync(true);
+                logger.LogInformation(@$"-= Email({mail.MessageId}) para: {string.Join(";", to)}, assunto: {subject} =-");
             }
             catch (InvalidOperationException ioex)
             {
-                logger.LogError("SendMailAsync => InvalidOperationException", ioex);
+                logger.LogError(ioex, "SendMailAsync => InvalidOperationException");
             }
             catch (Exception ex)
             {
-                logger.LogError("SendMailAsync => Exception", ex);
+                logger.LogError(ex, "SendMailAsync => Exception");
             }
         }
 

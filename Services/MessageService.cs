@@ -34,11 +34,12 @@ namespace upsa_api.Services
 
             try
             {
-                await emailService.SendMailAsync(new List<string> { person1.Email, person2?.Email }, null, new List<string> { "xbrown@gmail.com" }, null, "Divergência de processo", body, 3);
+                await emailService.SendMailAsync(new List<string> { person1.Email, person2?.Email }, null, null, null, "Divergência de processo", body, 3);
                 return true;
             }
             catch (System.Exception ex)
             {
+                logger.LogError(ex, ex.Message);
                 throw ex;
             }
         }

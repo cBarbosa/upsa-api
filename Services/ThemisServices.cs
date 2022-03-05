@@ -54,21 +54,29 @@ namespace upsa_api.Services
             if (person == null)
                 return false;
 
-            if(!process.Desdobramentos.Any())
+            if (!process.Desdobramentos.Any())
                 return false;
 
-            var resultInterno = await AddAndamentoPorStatus(andamento, process.Desdobramentos.First().Id, 6);
+            try
+            {
+                var resultInterno = await AddAndamentoPorStatus(andamento, process.Desdobramentos.First().Id, 6);
 
-            if (resultInterno == null)
+                if (resultInterno == null)
+                    return false;
+
+                var resultadoJudicial = await AddAndamentoPorStatus(andamento, process.Desdobramentos.First().Id, 12);
+
+                if (resultadoJudicial == null)
+                    return false;
+
+                //return await SendMessage("xbrown@gmail.com", resultInterno, resultadoJudicial);
+                return await SendMessage(person?.Email ?? "xbrown@gmail.com", resultInterno, resultadoJudicial);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
                 return false;
-
-            var resultadoJudicial = await AddAndamentoPorStatus(andamento, process.Desdobramentos.First().Id, 12);
-
-            if (resultadoJudicial == null)
-                return false;
-
-            //return await SendMessage("xbrown@gmail.com", resultInterno, resultadoJudicial);
-            return await SendMessage(person?.Email ?? "xbrown@gmail.com", resultInterno, resultadoJudicial);
+            }
         }
 
         public async Task<Processo> GetProcess(string number)
@@ -76,13 +84,17 @@ namespace upsa_api.Services
             var options = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                //NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
-                //DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
             };
 
             try
             {
-                using HttpClient http = new HttpClient();
+
+                var handler = new HttpClientHandler
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Automatic,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true
+                };
+                using var http = new HttpClient(handler);
                 http.DefaultRequestHeaders.Add(headerAuthAPI, headerUserNamePasswordAPI);
                 var result = await http.GetAsync(new Uri($"{hostBaseAPI}/processos/numero/{number}/json"));
 
@@ -112,13 +124,16 @@ namespace upsa_api.Services
             var options = new JsonSerializerOptions()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                //NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
-                //DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
             };
 
             try
             {
-                using HttpClient http = new HttpClient();
+                var handler = new HttpClientHandler
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Automatic,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true
+                };
+                using var http = new HttpClient(handler);
                 http.DefaultRequestHeaders.Add(headerAuthAPI, headerUserNamePasswordAPI);
                 var result = await http.GetAsync(new Uri($"{hostBaseAPI}/pessoa/{personId}/json"));
 
@@ -150,7 +165,12 @@ namespace upsa_api.Services
 
             try
             {
-                using HttpClient http = new HttpClient();
+                var handler = new HttpClientHandler
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Automatic,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true
+                };
+                using var http = new HttpClient(handler);
                 http.DefaultRequestHeaders.Add(headerAuthAPI, headerUserNamePasswordAPI);
                 var _content = new StringContent(JsonSerializer.Serialize(process, options), Encoding.UTF8, "application/json");
                 var result = await http.PostAsync(new Uri($"{hostBaseAPI}processo/novo/json"), _content);
@@ -196,14 +216,17 @@ namespace upsa_api.Services
         {
             var options = new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                //NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
-                //DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
 
             try
             {
-                using HttpClient http = new HttpClient();
+                var handler = new HttpClientHandler
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Automatic,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true
+                };
+                using var http = new HttpClient(handler);
                 http.DefaultRequestHeaders.Add(headerAuthAPI, headerUserNamePasswordAPI);
                 var _content = new StringContent(JsonSerializer.Serialize(andamento, options), Encoding.UTF8, "application/json");
                 var result = await http.PostAsync(new Uri($"{hostBaseAPI}/andamentos/novo/json"), _content);
@@ -245,14 +268,20 @@ namespace upsa_api.Services
                 <strong>Data Hora:</strong> {resultadoJudicial?.DataFormatada} {resultadoJudicial?.HoraFormatada}<BR/>
             ";
 
-            await _emailService.SendMailAsync(new List<string> { fromMail }, null, new List<string> { "xbrown@gmail.com" }, null, "Distribuição de processo", _htmlBodyMessage, 3);
-
+            try
+            {
+                await _emailService.SendMailAsync(new List<string> { fromMail }, null, null, null, "Distribuição de processo", _htmlBodyMessage, 3);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
             return true;
         }
 
         #endregion
 
-        #region internal classes
+        #region internal domain classes
 
         public class Processo
         {
@@ -276,6 +305,7 @@ namespace upsa_api.Services
             public Pessoa Advogado { get; set; }
             public Pessoa Cliente { get; set; }
             public Pessoa ParteInteressada { get; set; }
+            public Pessoa ParteContraria { get; set; }
             public Pessoa Area { get; set; }
             public Pessoa Acao { get; set; }
             public Pessoa Dominio { get; set; }
