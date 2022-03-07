@@ -104,7 +104,7 @@ namespace upsa_api.Services
                     return null;
 
                 return JsonSerializer.Deserialize<Processo[]>(resultContent, options).Length > 0
-                    ? JsonSerializer.Deserialize<Processo[]>(resultContent, options)[0]
+                    ? JsonSerializer.Deserialize<Processo[]>(resultContent, options)[JsonSerializer.Deserialize<Processo[]>(resultContent, options).Length-1]
                     : null;
             }
             catch (HttpRequestException re)
