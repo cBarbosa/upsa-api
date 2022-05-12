@@ -198,29 +198,10 @@ namespace upsa_api.Services
     public class FirebaseSettings
     {
         [JsonPropertyName("project_id")]
-        public string ProjectId => "upsa-bsb";
+        public string ProjectId => "";
 
         [JsonPropertyName("private_key_id")]
-        public string PrivateKeyId => "294453929734-oi2fivnr2p5sn51snoc48f7q9omjo50a.apps.googleusercontent.com";
-
-        //[JsonPropertyName("api_key")]
-        //public string ApiKey => "AIzaSyC75MBqkdZfPU2ZI6CmiR0_IPsqjnlDcPk";
-
-        //[JsonPropertyName("Auth_domain")]
-        //public string AuthDomain => "upsa-bsb.firebaseapp.com";
-
-        //[JsonPropertyName("Auth_domain")]
-        //public string AuthDomain => "upsa-bsb.firebaseapp.com";
-
-        // ... and so on
-
-  //      "apiKey": "AIzaSyC75MBqkdZfPU2ZI6CmiR0_IPsqjnlDcPk",
-  //"authDomain": "upsa-bsb.firebaseapp.com",
-  //"projectId": "upsa-bsb",
-  //"storageBucket": "upsa-bsb.appspot.com",
-  //"messagingSenderId": "294453929734",
-  //"appId": "1:294453929734:web:2d4c731e42b8f556b12087",
-  //"measurementId": "G-3XKPW9B859"
+        public string PrivateKeyId => "";
     }
 
     public class SendEmail
