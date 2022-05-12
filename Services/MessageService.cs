@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using upsa_api.Models;
 using upsa_api.Services.Interfaces;
@@ -9,32 +10,45 @@ namespace upsa_api.Services
     public class MessageService : IMessageService
     {
         private readonly ILogger<MessageService> logger;
-        private readonly IEmailService emailService;
-        private readonly IThemisService _themisService;
-        
+        private readonly IEmailService _emailService;
+        private readonly FirebaseService _firebaseService;
+
 
         public MessageService(ILogger<MessageService> _logger,
-            IEmailService _emailService,
-            IThemisService themisService)
+            IEmailService emailService,
+            FirebaseService firebaseService)
         {
-            emailService = _emailService;
-            _themisService = themisService;
+            _emailService = emailService;
+            _firebaseService = firebaseService;
             logger = _logger;
         }
 
         public async Task<bool> SendNotifyToAvocados(NotifyAvocadoModel notify)
         {
             var body = BindSendMessage(notify);
-
-            var person1 = await _themisService.GetPerson(666); // Julio
-            if (person1 == null)
-                return false;
-
-            var person2 = await _themisService.GetPerson(663); // Manoel Valter
+            var _bcc = new List<string> { "charles.barbosa@smile.tec.br" };
+            var _avocados = await _firebaseService.GetEmailUsersByProfile("avocado", new CancellationToken());
 
             try
             {
-                await emailService.SendMailAsync(new List<string> { person1.Email, person2?.Email }, null, null, null, "Divergência de processo", body, 3);
+                await _emailService.SendMailAsync(_avocados, null, _bcc, null, "Divergência de processo", body, 3);
+                return true;
+            }
+            catch (System.Exception ex)
+            {
+                logger.LogError(ex, ex.Message);
+                throw ex;
+            }
+        }
+
+        public async Task<bool> SendDaylyNotification()
+        {
+            var _bcc = new List<string> { "charles.barbosa@smile.tec.br" };
+
+            try
+            {
+                var result = await _firebaseService.GetReportEmail();
+                await _emailService.SendMailAsync(result.to, null, _bcc, null, "Relatório de Processos", result.bodyMessage, 3);
                 return true;
             }
             catch (System.Exception ex)
@@ -51,10 +65,11 @@ namespace upsa_api.Services
                 <em>{notify?.Observation}</em>
                 
                 <h4>Prazo Interno</h4>
-                <strong>Prazo 1</strong> {notify?.InternalDate1} - <strong>Prazo 2</strong> {notify?.InternalDate2}<BR/>
+                <strong>Prazo 1</strong> {notify?.InternalDate1} - <strong>Prazo 2</strong> {notify?.InternalDate2}<br />
 
                 <h4>Prazo Judicial</h4>
-                <strong>Prazo 1</strong> {notify?.CourtDate1} - <strong>Prazo 2</strong> {notify?.CourtDate2}<BR/>
+                <strong>Prazo 1</strong> {notify?.CourtDate1} - <strong>Prazo 2</strong> {notify?.CourtDate2}<br />
+                <hr>
             ";
     }
 }

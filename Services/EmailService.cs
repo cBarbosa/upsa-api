@@ -5,19 +5,25 @@ using MailKit.Security;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using upsa_api.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace upsa_api.Services
 {
     public class EmailService: IEmailService
     {
-        private readonly string SmtpHost = "mail.upsa-api.smile.tec.br";
-        private readonly int SmtpPort = 465;
-        private readonly string SmtpAccount = "noreply@upsa-api.smile.tec.br";
-        private readonly string SmtpPassword = "0Kx%N.uXiJau";
+        private readonly string SmtpHost;
+        private readonly int SmtpPort;
+        private readonly string SmtpAccount;
+        private readonly string SmtpPassword;
         private readonly ILogger<EmailService> logger;
 
-        public EmailService(ILogger<EmailService> _logger)
+        public EmailService(ILogger<EmailService> _logger,
+            IConfiguration configuration)
         {
+            SmtpHost = configuration["email:SmtpHost"];
+            SmtpAccount = configuration["email:SmtpAccountLogin"];
+            SmtpPassword = configuration["email:SmtpAccountPassword"];
+            _ = int.TryParse(configuration["email:SmtpPort"], out SmtpPort);
             logger = _logger;
         }
 
@@ -70,21 +76,21 @@ namespace upsa_api.Services
                 MessageId = Guid.NewGuid().ToString()
             };
 
-            mail.From.Add(new MailboxAddress("UPSA", SmtpAccount));
+            mail.From.Add(new MailboxAddress("UPSA - Sistema de Prazos", SmtpAccount));
 
             foreach (var address in to)
-                mail.To.Add(new MailboxAddress(address, address));
+                mail.To.Add(new MailboxAddress(address));
 
             if (cc != null)
             {
                 foreach (var address in cc)
-                    mail.Cc.Add(new MailboxAddress(address, address));
+                    mail.Cc.Add(new MailboxAddress(address));
             }
 
             if (bcc != null)
             {
                 foreach (var address in bcc)
-                    mail.Bcc.Add(new MailboxAddress(address, address));
+                    mail.Bcc.Add(new MailboxAddress(address));
             }
 
             if (attachment != null)

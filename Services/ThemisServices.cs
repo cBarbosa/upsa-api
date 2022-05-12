@@ -369,7 +369,7 @@ namespace upsa_api.Services
             public Processo.Pessoa Advogado { get; set; }
             public Processo.Pessoa Tipo { get; set; }
             public Processo.Desdobramento Desdobramento { get; set; }
-            public string Hora => "10:30";
+            public string Hora => "23:59";
         }
 
         #endregion
