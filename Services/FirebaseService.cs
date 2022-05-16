@@ -21,35 +21,63 @@ namespace upsa_api.Services
         {
             CancellationToken cancellationToken = new CancellationToken();
             var _DistribuitionsProcessList = string.Empty;
-            var _DistribuitionsProcess = 0;
+            var _DivergentProcessList = string.Empty;
+            var _WaitingForProcessList = string.Empty;
+            var _ProcessCount1 = 0;
+            var _ProcessCount2 = 0;
+            var _ProcessCount3 = 0;
             var _processos = await GetAll<Proccess>(cancellationToken);
             
             foreach (var processo in _processos)
             {
                 if (processo.DateFinal != null)
                 {
+                    // Get all distribuited process until 1 week
                     DateTime.TryParseExact(processo.DateFinal, "d", new System.Globalization.CultureInfo("pt-BR"), System.Globalization.DateTimeStyles.None, out DateTime dataFinal);
-                    if (dataFinal.CompareTo(DateTime.Now) > 0) {
+                    if (dataFinal.CompareTo(DateTime.Now.AddDays(7)) < 1 && dataFinal.CompareTo(DateTime.Now) > 0)
+                    {
                         _DistribuitionsProcessList += $@"<li>Processo <strong>{processo.Number}</strong><br />
                             Data: {dataFinal:d}<br />
                             Responsável: {(await Get<Users>(processo.Accountable, cancellationToken))?.DisplayName ?? "N/D"}</li>";
-                        _DistribuitionsProcess++;
+                        _ProcessCount1++;
                     }
+                }
+
+                // Get all divergent process
+                if (processo.Deadline.Length == 2 && processo.DateFinal == null)
+                {
+                    if (processo.Deadline[0].CourtDate != processo.Deadline[1].CourtDate
+                        || processo.Deadline[0].InternalDate != processo.Deadline[1].InternalDate)
+                    {
+                        _DivergentProcessList += $@"<li>Processo <strong>{processo.Number}</strong><br />
+                            Responsável: {(await Get<Users>(processo.Accountable, cancellationToken))?.DisplayName ?? "N/D"}</li>";
+                        _ProcessCount2++;
+                    }
+                }
+
+                // Get all waiting analisys process
+                if (processo.Deadline.Length == 1)
+                {
+                    _WaitingForProcessList += $@"<li>Processo <strong>{processo.Number}</strong></li>";
+                    _ProcessCount3++;
                 }
             }
 
             var bodyMessage = @$"
-                <h2>Lista de Processos para distribuir</h2>
-                <ul>
-                    {_DistribuitionsProcessList}
-                </ul>
-                <p>Total de processos para distribuição: {_DistribuitionsProcess}</p>
-                <hr>
-            ";
+                <h2>Lista de processos distribuidos (Próximos 7 Dias)</h2>
+                    <ul>{_DistribuitionsProcessList}</ul>
+                    <p>Total de processos: {_ProcessCount1}</p><hr>
+                <h2>Lista de processos divergentes</h2>
+                    <ul>{_DivergentProcessList}</ul>
+                    <p>Total de processos: {_ProcessCount2}</p><hr>
+                <h2>Lista de processos pendentes para distribuição</h2>
+                    <ul>{_WaitingForProcessList}</ul>
+                    <p>Total de processos: {_ProcessCount3}</p>
+                ";
 
             return new SendEmail
             {
-                to = await GetEmailUsersByProfile("avocado", cancellationToken),
+                to = await GetEmailUsersByProfile("all", cancellationToken),
                 bodyMessage = bodyMessage
             };
         }
@@ -58,11 +86,13 @@ namespace upsa_api.Services
         {
             try
             {
-                var result = (await GetAll<Users>(ct))
+                return !profile.ToLower().Equals("all")
+                    ? (await GetAll<Users>(ct))
                                .Where(x => x.Role.ToLower().Equals(profile))
+                               .Select(y => y.Email).ToList()
+                    : (await GetAll<Users>(ct))
+                                .Where(x => !x.Role.Equals("admin"))
                                .Select(y => y.Email).ToList();
-
-                return result;
             }
             catch
             {
@@ -96,7 +126,6 @@ namespace upsa_api.Services
         }
 
         // just add here any method you need here WhereGreaterThan, WhereIn etc ...
-
         private static async Task<IReadOnlyCollection<T>> GetList<T>(Query query, CancellationToken ct) where T : IFirebaseEntity
         {
             var snapshot = await query.GetSnapshotAsync(ct);
@@ -189,6 +218,15 @@ namespace upsa_api.Services
         [FirestoreProperty("created_at")]
         public Timestamp CreatedAt { get; set; }
 
+        [FirestoreProperty("deadline_court_date")]
+        public string CourtDate { get; set; }
+
+        [FirestoreProperty("deadline_internal_date")]
+        public string InternalDate { get; set; }
+
+        [FirestoreProperty("deadline_interpreter")]
+        public string Interpreter { get; set; }
+
         public Deadline()
         {
 
@@ -198,29 +236,10 @@ namespace upsa_api.Services
     public class FirebaseSettings
     {
         [JsonPropertyName("project_id")]
-        public string ProjectId => "upsa-bsb";
+        public string ProjectId => "";
 
         [JsonPropertyName("private_key_id")]
-        public string PrivateKeyId => "294453929734-oi2fivnr2p5sn51snoc48f7q9omjo50a.apps.googleusercontent.com";
-
-        //[JsonPropertyName("api_key")]
-        //public string ApiKey => "AIzaSyC75MBqkdZfPU2ZI6CmiR0_IPsqjnlDcPk";
-
-        //[JsonPropertyName("Auth_domain")]
-        //public string AuthDomain => "upsa-bsb.firebaseapp.com";
-
-        //[JsonPropertyName("Auth_domain")]
-        //public string AuthDomain => "upsa-bsb.firebaseapp.com";
-
-        // ... and so on
-
-  //      "apiKey": "AIzaSyC75MBqkdZfPU2ZI6CmiR0_IPsqjnlDcPk",
-  //"authDomain": "upsa-bsb.firebaseapp.com",
-  //"projectId": "upsa-bsb",
-  //"storageBucket": "upsa-bsb.appspot.com",
-  //"messagingSenderId": "294453929734",
-  //"appId": "1:294453929734:web:2d4c731e42b8f556b12087",
-  //"measurementId": "G-3XKPW9B859"
+        public string PrivateKeyId => "";
     }
 
     public class SendEmail

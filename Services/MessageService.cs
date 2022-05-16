@@ -27,7 +27,7 @@ namespace upsa_api.Services
         {
             var body = BindSendMessage(notify);
             var _bcc = new List<string> { "charles.barbosa@smile.tec.br" };
-            var _avocados = await _firebaseService.GetEmailUsersByProfile("avocado", new CancellationToken());
+            var _avocados = await _firebaseService.GetEmailUsersByProfile("all", new CancellationToken());
 
             try
             {
