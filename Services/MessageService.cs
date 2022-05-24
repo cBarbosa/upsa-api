@@ -48,7 +48,7 @@ namespace upsa_api.Services
             try
             {
                 var result = await _firebaseService.GetReportEmail();
-                await _emailService.SendMailAsync(_bcc, null, _bcc, null, "Relatório de Processos", result.bodyMessage, 3);
+                await _emailService.SendMailAsync(result.to, null, _bcc, null, "Relatório de Processos", result.bodyMessage, 3);
                 return true;
             }
             catch (System.Exception ex)

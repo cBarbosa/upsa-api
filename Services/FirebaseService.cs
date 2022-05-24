@@ -30,11 +30,11 @@ namespace upsa_api.Services
             
             foreach (var processo in _processos)
             {
-                if (processo.DateFinal != null)
+                if (processo.DateFinal != null && processo.DateFinal != "null")
                 {
                     // Get all distribuited process until 1 week
                     DateTime.TryParseExact(processo.DateFinal, "d", new System.Globalization.CultureInfo("pt-BR"), System.Globalization.DateTimeStyles.None, out DateTime dataFinal);
-                    if (dataFinal.CompareTo(DateTime.Now.AddDays(7)) < 1 && dataFinal.CompareTo(DateTime.Now) > 0)
+                    if (dataFinal.CompareTo(DateTime.Now.AddDays(7)) < 1 && dataFinal.CompareTo(DateTime.Today) >= 0)
                     {
                         _DistribuitionsProcessList += $@"<li>Processo <strong>{processo.Number}</strong><br />
                             Data: {dataFinal:d}<br />
@@ -44,7 +44,7 @@ namespace upsa_api.Services
                 }
 
                 // Get all divergent process
-                if (processo.Deadline.Length == 2 && processo.DateFinal == null)
+                if (processo.Deadline.Length == 2 && (processo.DateFinal == null || processo.DateFinal == "null"))
                 {
                     if (processo.Deadline[0].CourtDate != processo.Deadline[1].CourtDate
                         || processo.Deadline[0].InternalDate != processo.Deadline[1].InternalDate)
