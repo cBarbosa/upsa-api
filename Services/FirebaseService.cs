@@ -46,8 +46,8 @@ namespace upsa_api.Services
                 // Get all divergent process
                 if (processo.Deadline.Length == 2 && (processo.DateFinal == null || processo.DateFinal == "null"))
                 {
-                    if (processo.Deadline[0].CourtDate != processo.Deadline[1].CourtDate
-                        || processo.Deadline[0].InternalDate != processo.Deadline[1].InternalDate)
+                    if ((!processo.Deadline[0].Checked && processo.Deadline[0].CourtDate != processo.Deadline[1].CourtDate)
+                        || (!processo.Deadline[1].Checked && processo.Deadline[0].InternalDate != processo.Deadline[1].InternalDate))
                     {
                         _DivergentProcessList += $@"<li>Processo <strong>{processo.Number}</strong><br />
                             Responsável: {(await Get<Users>(processo.Accountable, cancellationToken))?.DisplayName ?? "N/D"}</li>";

@@ -310,7 +310,7 @@ namespace upsa_api.Services
             public Pessoa Acao { get; set; }
             public Pessoa Dominio { get; set; }
             public Pessoa Instancia { get; set; }
-            public Pessoa PosicaoParte { get; set; }
+            public Posicao PosicaoParte { get; set; }
             public Pessoa UsuarioEncerramento { get; set; }
             public IEnumerable<Desdobramento> Desdobramentos { get; set; }
 
@@ -335,6 +335,13 @@ namespace upsa_api.Services
             public class Desdobramento
             {
                 public int Id { get; set; }
+            }
+
+            public class Posicao
+            {
+                public int Id { get; set; }
+                public string PosAtiva { get; set; }
+                public string PosPassiva { get; set; }
             }
         }
 
