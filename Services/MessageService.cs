@@ -12,14 +12,17 @@ namespace upsa_api.Services
         private readonly ILogger<MessageService> logger;
         private readonly IEmailService _emailService;
         private readonly FirebaseService _firebaseService;
+        private readonly SendGridProvider _sendGridProvider;
 
 
         public MessageService(ILogger<MessageService> _logger,
             IEmailService emailService,
-            FirebaseService firebaseService)
+            FirebaseService firebaseService,
+            SendGridProvider sendGridProvider)
         {
             _emailService = emailService;
             _firebaseService = firebaseService;
+            _sendGridProvider = sendGridProvider;
             logger = _logger;
         }
 
@@ -31,7 +34,9 @@ namespace upsa_api.Services
 
             try
             {
-                await _emailService.SendMailAsync(_avocados, null, _bcc, null, "Divergência de processo", body, 3);
+                //await _emailService.SendMailAsync(_avocados, null, _bcc, null, "Divergência de processo", body, 3);
+                var result = await _sendGridProvider.SendEmailAsync(_avocados, null, _bcc, "Divergência de processo", body);
+
                 return true;
             }
             catch (System.Exception ex)
@@ -48,7 +53,12 @@ namespace upsa_api.Services
             try
             {
                 var result = await _firebaseService.GetReportEmail();
-                await _emailService.SendMailAsync(result.to, null, _bcc, null, "Relatório de Processos", result.bodyMessage, 3);
+                //await _emailService.SendMailAsync(result.to, null, _bcc, null, "Relatório de Processos", result.bodyMessage, 3);
+                var _mail = await _sendGridProvider.SendEmailAsync(result.to, null, _bcc, "Relatório de Processos", result.bodyMessage);
+
+                if(!_mail.Equals(System.Net.HttpStatusCode.Accepted))
+                    return false;
+
                 return true;
             }
             catch (System.Exception ex)
