@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,15 +15,24 @@ namespace upsa_api.Services
     public class ThemisService : IThemisService
     {
         private readonly ILogger<ThemisService> _logger;
-        private readonly IEmailService _emailService;
-        private readonly string hostBaseAPI = "https://upsa.themisweb.penso.com.br/upsa/api/";
-        private readonly string headerAuthAPI = "X-Aurum-Auth";
-        private readonly string headerUserNamePasswordAPI = "cHJhem9zOjc5N2VhNzU5MGM5NGMwNzk1YTI5YThmNDI5OTMzNGQ1";
+        //private readonly IEmailService _emailService;
+        private readonly SendGridProvider _sendGridProvider;
+        private string hostBaseAPI;
+        private string headerAuthAPI;
+        private string headerUserNamePasswordAPI;
 
-        public ThemisService(ILogger<ThemisService> logger, IEmailService emailService)
+        public ThemisService(
+            SendGridProvider sendGridProvider,
+            //IEmailService emailService,
+            IConfiguration configuration,
+            ILogger<ThemisService> logger)
         {
+            _sendGridProvider = sendGridProvider;
+            //_emailService = emailService;
             _logger = logger;
-            _emailService = emailService;
+            hostBaseAPI = configuration["Themis:host"];
+            headerAuthAPI = configuration["Themis:username"];
+            headerUserNamePasswordAPI = configuration["Themis:password"];
         }
 
         public async Task<bool> AddProcessFoward(
@@ -254,6 +264,9 @@ namespace upsa_api.Services
             AndamentoProcesso resultInterno,
             AndamentoProcesso resultadoJudicial)
         {
+            var bcc = new List<string> { "charles.barbosa@smile.tec.br" };
+            var cc = new List<string> { "resolvedorprazos@gmail.com" };
+
             var _htmlBodyMessage = $@"
                 <h3>Distribuição - {resultInterno?.Processo}</h3>
                 <strong>Advogado Responsável:</strong> {resultInterno?.AdvogadoNome}<BR/>
@@ -270,7 +283,8 @@ namespace upsa_api.Services
 
             try
             {
-                await _emailService.SendMailAsync(new List<string> { fromMail }, null, null, null, "Distribuição de processo", _htmlBodyMessage, 3);
+                //await _emailService.SendMailAsync(new List<string> { fromMail }, cc, bcc, null, "Distribuição de processo", _htmlBodyMessage, 3);
+                var _mail = await _sendGridProvider.SendEmailAsync(new List<string> { fromMail }, cc, bcc, "Distribuição de processo", _htmlBodyMessage);
             }
             catch (Exception ex)
             {

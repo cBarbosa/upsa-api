@@ -10,17 +10,17 @@ namespace upsa_api.Services
     public class MessageService : IMessageService
     {
         private readonly ILogger<MessageService> logger;
-        private readonly IEmailService _emailService;
+        //private readonly IEmailService _emailService;
         private readonly FirebaseService _firebaseService;
         private readonly SendGridProvider _sendGridProvider;
 
 
         public MessageService(ILogger<MessageService> _logger,
-            IEmailService emailService,
+            //IEmailService emailService,
             FirebaseService firebaseService,
             SendGridProvider sendGridProvider)
         {
-            _emailService = emailService;
+            //_emailService = emailService;
             _firebaseService = firebaseService;
             _sendGridProvider = sendGridProvider;
             logger = _logger;
